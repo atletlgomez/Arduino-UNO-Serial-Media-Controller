@@ -15,6 +15,8 @@ while True:
     message = message.decode("utf-8")
     message = message.strip()
 
+    subprocess.run([])
+
 
     if message == "PLAY_PAUSE":
         subprocess.run(["playerctl", "-p", "spotify", "play-pause"])

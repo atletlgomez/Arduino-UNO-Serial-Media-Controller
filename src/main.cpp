@@ -33,7 +33,16 @@ void loop() {
   if ((currentButtonState == LOW) && (prevButtonState == HIGH) && ((currentTime - prevTime) >= bounceDelay)) {
     Serial.println("PLAY_PAUSE");
     prevTime = currentTime;
+  } else {
+    Serial.println("SPOTIFY");
+    prevTime = currentTime;
   }
+
+  
+  
+  
+
+
 
   prevButtonState = currentButtonState;
 
