@@ -21,6 +21,12 @@ while True:
 
         if message == "PLAY_PAUSE":
             subprocess.run(["playerctl", "-p", "spotify", "play-pause"])
+        
+        if message == "NEXT":
+            subprocess.run(["playerctl", "-p", "spotify", "next"])
+
+        if message == "PREV":
+            subprocess.run(["playerctl", "-p", "spotify", "previous"])
 
         if message:
             print("Received command:", message)
@@ -38,10 +44,6 @@ while True:
         capture_output=True,
         text=True
     )
-
-    subprocess.run([])
-
-
 
     artist = artistResult.stdout.strip()
     song = songResult.stdout.strip()
