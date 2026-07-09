@@ -1,11 +1,17 @@
 import serial
-import time
 import subprocess
+import time
 
-arduino_port = "/dev/ttyACM0"
-baud_rate = 9600
+ARDUINO_PORT = "/dev/ttyACM0"
+BAUD_RATE = 9600
+PLAYER = "spotify"
 
-arduino = serial.Serial(arduino_port, baud_rate)
+
+def run_playerctl(*args):
+    subprocess.run(["playerctl", "-p", PLAYER, *args], check=False)
+
+
+arduino = serial.Serial(ARDUINO_PORT, BAUD_RATE)
 time.sleep(2)
 
 print("Connected. Waiting for Arduino messages...")
@@ -14,54 +20,40 @@ last_artist = ""
 last_song = ""
 
 while True:
-    # Check if Arduino sent something
     if arduino.in_waiting > 0:
-        message = arduino.readline()
-        message = message.decode("utf-8").strip()
-
-        if message == "PLAY_PAUSE":
-            subprocess.run(["playerctl", "-p", "spotify", "play-pause"])
-        
-        if message == "NEXT":
-            subprocess.run(["playerctl", "-p", "spotify", "next"])
-
-        if message == "PREV":
-            subprocess.run(["playerctl", "-p", "spotify", "previous"])
-
-        
-        if message == "VOL+":
-            subprocess.run(["playerctl", "-p", "spotify", "volume", "0.1+"])
-
-
-        if message == "VOL-":
-            subprocess.run(["playerctl", "-p", "spotify", "volume", "0.1-"])
+        message = arduino.readline().decode("utf-8").strip()
 
         if message:
             print("Received command:", message)
 
-    # Get current artist
-    artistResult = subprocess.run(
-        ["playerctl", "-p", "spotify", "metadata", "-f", "{{artist}}"],
+            if message == "PLAY_PAUSE":
+                run_playerctl("play-pause")
+            elif message == "NEXT":
+                run_playerctl("next")
+            elif message == "PREV":
+                run_playerctl("previous")
+            elif message == "VOL+":
+                run_playerctl("volume", "0.1+")
+            elif message == "VOL-":
+                run_playerctl("volume", "0.1-")
+
+    artist = subprocess.run(
+        ["playerctl", "-p", PLAYER, "metadata", "-f", "{{artist}}"],
         capture_output=True,
-        text=True
-    )
+        text=True,
+        check=False,
+    ).stdout.strip()
 
-    # Get current song
-    songResult = subprocess.run(
-        ["playerctl", "-p", "spotify", "metadata", "-f", "{{title}}"],
+    song = subprocess.run(
+        ["playerctl", "-p", PLAYER, "metadata", "-f", "{{title}}"],
         capture_output=True,
-        text=True
-    )
+        text=True,
+        check=False,
+    ).stdout.strip()
 
-    artist = artistResult.stdout.strip()
-    song = songResult.stdout.strip()
-
-    # Only send artist if it changed
-    if (artist and song) and (artist != last_artist or song != last_song):
-        message_to_arduino = artist + "\n" + song + "\n"
-        arduino.write(message_to_arduino.encode("utf-8"))
-
-        last_artist = artist
-        last_song = song
+    # Only send updates when the metadata changes.
+    if artist and song and (artist != last_artist or song != last_song):
+        arduino.write(f"{artist}\n{song}\n".encode("utf-8"))
+        last_artist, last_song = artist, song
 
     time.sleep(0.5) 
