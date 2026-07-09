@@ -25,7 +25,7 @@ String prevSong = "";
 
 //IR Remote Debouncing
 unsigned long prevTimeRemote = 0; 
-unsigned long remoteButtonDelay = 200;
+unsigned long remoteButtonDelay = 300;
 
 
 
@@ -61,13 +61,7 @@ void loop()
     currentButtonState = HIGH;
   }
 
-  // Display the artist on to the screen, will be the next step
 
-  // if ((currentButtonState == LOW) && (prevButtonState == HIGH) && ((currentTime - prevTime) >= bounceDelay))
-  // {
-  //   Serial.println("PLAY_PAUSE");
-  //   prevTime = currentTime;
-  // }
 
   //Remote Decoding
 
@@ -89,10 +83,16 @@ void loop()
         case 0x44:
           Serial.println("PREV");
           break;
+        case 0x46:
+          Serial.println("VOL+");
+          break;
+        case 0x15:
+          Serial.println("VOL-");
+          break;
       }
-
       prevTimeRemote = currentTime;
     }
+    
     IrReceiver.resume();
   }
 

@@ -28,6 +28,14 @@ while True:
         if message == "PREV":
             subprocess.run(["playerctl", "-p", "spotify", "previous"])
 
+        
+        if message == "VOL+":
+            subprocess.run(["playerctl", "-p", "spotify", "volume", "0.1+"])
+
+
+        if message == "VOL-":
+            subprocess.run(["playerctl", "-p", "spotify", "volume", "0.1-"])
+
         if message:
             print("Received command:", message)
 
